@@ -1,5 +1,5 @@
 package org.laolittle.plugin
 
 enum class AmiyaFunction {
-    Todo,
+    SIGN_IN,
 }

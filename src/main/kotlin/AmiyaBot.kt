@@ -28,7 +28,7 @@ object AmiyaBot : KotlinPlugin(
         return PermissionService.INSTANCE.register(permissionId(id), description, this.parentPermission)
     }
 
-    private fun init(){
+    private fun init() {
         AmiyaConfig.reload()
         AmiyaData.reload()
         AmiyaManager.start()
