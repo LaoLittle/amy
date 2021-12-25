@@ -18,8 +18,6 @@ object AmiyaBot : KotlinPlugin(
     }
 ) {
     override fun onEnable() {
-
-
         init()
         logger.info { "Amiya-Bot 初始化完毕" }
     }

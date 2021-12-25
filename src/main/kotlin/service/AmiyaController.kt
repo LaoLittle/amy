@@ -5,13 +5,13 @@ import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.Listener
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import org.laolittle.plugin.AmiyaFunction
+import org.laolittle.plugin.AmiyaFunction.NUDGE
 import org.laolittle.plugin.AmiyaFunction.SIGN_IN
 
 object AmiyaController {
     fun Group.enableAmiya(type: AmiyaFunction): Listener<*> = when (type) {
-        SIGN_IN -> this.subscribeAlways {
-            TODO()
-        }
+        SIGN_IN -> subscribeAlways { }
+        NUDGE -> subscribeAlways { }
     }
 
     private fun Group.subscribeAlways(block: GroupMessageEvent.() -> Unit): Listener<GroupMessageEvent> =
