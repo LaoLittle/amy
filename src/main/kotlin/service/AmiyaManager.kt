@@ -8,6 +8,7 @@ import net.mamoe.mirai.event.Listener
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.data.content
+import net.mamoe.mirai.utils.error
 import net.mamoe.mirai.utils.info
 import org.laolittle.plugin.AmiyaBot
 import org.laolittle.plugin.AmiyaBot.registerPermission
@@ -27,6 +28,8 @@ object AmiyaManager : Service() {
         GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
             val matchResult = Regex("(?i)(?:阿米娅|amiya)(.*)").find(message.content)
             if ((sender.isOperator() || sender.permitteeId.hasPermission(amiyaAdministratorPerm)) && (matchResult != null)) {
+                val listeners: MutableMap<AmiyaFunction, Listener<*>> =
+                    onEnabledGroups[subject.id]?.toMutableMap() ?: mutableMapOf()
                 val functionMatch = Regex("(打开|关闭)(.*)").find(matchResult.groupValues[1])
                 logger.info { matchResult.groupValues.toString() }
                 when (matchResult.groupValues[1]) {
@@ -37,7 +40,6 @@ object AmiyaManager : Service() {
                             subject.sendMessage("已经在上班了")
                             return@subscribeAlways
                         }
-                        val listeners = mutableMapOf<AmiyaFunction, Listener<*>>()
                         enabled.forEach {
                             listeners[it] = subject.enableAmiya(it)
                         }
@@ -45,7 +47,6 @@ object AmiyaManager : Service() {
                         subject.sendMessage("开始996")
                     }
                     "下班" -> {
-                        val listeners = onEnabledGroups[subject.id] ?: mutableMapOf()
                         if (onEnabledGroups[subject.id] == null) return@subscribeAlways
                         val enabled = enabledFunction[subject.id] ?: mutableSetOf(*AmiyaFunction.values())
                         enabled.forEach {
@@ -80,19 +81,25 @@ object AmiyaManager : Service() {
 
                     when (functionMatch.groupValues[1]) {
                         "打开" -> {
-                            if (enable.contains(function)) {
+                            if (enable.add(function)) {
+                                subject.sendMessage("已开启")
+                                if (onEnabledGroups.contains(subject.id)) listeners[function] =
+                                    subject.enableAmiya(function)
+                            } else {
                                 subject.sendMessage("此功能已开启")
                                 return@subscribeAlways
                             }
-                            enable.add(function)
                             enabledFunction[subject.id] = enable
                         }
                         "关闭" -> {
-                            if (!enable.contains(function)) {
+                            if (enable.remove(function)) {
+                                subject.sendMessage("已关闭")
+                                if (onEnabledGroups.contains(subject.id)) listeners[function]?.complete()
+                                    ?: logger.error { "发生预料外的错误" }
+                            } else {
                                 subject.sendMessage("此功能已关闭")
                                 return@subscribeAlways
                             }
-                            enable.remove(function)
                             enabledFunction[subject.id] = enable
                         }
                     }
