@@ -39,7 +39,7 @@ object AmiyaManager : Service() {
                         }
                         val listeners = mutableMapOf<AmiyaFunction, Listener<*>>()
                         enabled.forEach {
-                            listeners[it] = enableAmiya(it)
+                            listeners[it] = subject.enableAmiya(it)
                         }
                         onEnabledGroups[subject.id] = listeners
                         subject.sendMessage("开始996")
@@ -61,7 +61,7 @@ object AmiyaManager : Service() {
                                     add(it.toString())
                             }
                         }
-                        if (msg.isEmpty()){
+                        if (msg.isEmpty()) {
                             subject.sendMessage("没有关闭的功能")
                             return@subscribeAlways
                         }
