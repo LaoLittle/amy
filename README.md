@@ -1,1 +1,1 @@
-# AmiyaBot
+# Amy
