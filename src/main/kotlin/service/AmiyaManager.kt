@@ -3,8 +3,10 @@ package org.laolittle.plugin.service
 import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
 import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.contact.isOperator
+import net.mamoe.mirai.contact.nameCardOrNick
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.Listener
+import net.mamoe.mirai.event.events.BotMuteEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.data.content
@@ -69,7 +71,7 @@ object AmiyaManager : Service() {
                         subject.sendMessage(msg)
                     }
                 }
-                val function = when (functionMatch?.groupValues?.get(2)) {
+                val function = when (functionMatch?.let { it.groupValues[2] }) {
                     "签到" -> AmiyaFunction.SIGN_IN
                     else -> {
                         subject.sendMessage("我不知道你要开启什么")
@@ -103,6 +105,12 @@ object AmiyaManager : Service() {
                     }
                 }
             }
+        }
+
+        GlobalEventChannel.subscribeAlways<BotMuteEvent> {
+            val muteMessage = "被 ${group.name}($groupId) 的 ${operator.nameCardOrNick}(${operator.id}) 禁言"
+            if (group.quit()) logger.info { "$muteMessage, 已自动退群" }
+            else logger.error { "$muteMessage, 但已被踢出, 退群失败" }
         }
     }
 }
