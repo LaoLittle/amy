@@ -5,6 +5,8 @@ import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.console.plugin.jvm.AbstractJvmPlugin
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
+import net.mamoe.mirai.event.GlobalEventChannel
+import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.utils.info
 import org.laolittle.plugin.service.AmiyaManager
 
@@ -18,8 +20,11 @@ object AmiyaBot : KotlinPlugin(
     }
 ) {
     override fun onEnable() {
-        init()
-        logger.info { "Amiya-Bot 初始化完毕" }
+        GlobalEventChannel.subscribeAlways<BotOnlineEvent> {
+                init()
+                logger.info { "Bot(${bot.id}): Amiya-Bot 初始化完毕" }
+        }
+
     }
 
     fun AbstractJvmPlugin.registerPermission(id: String, description: String): Permission {
