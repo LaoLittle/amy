@@ -16,6 +16,8 @@ import org.laolittle.plugin.AmiyaFunction.*
 import java.io.File
 
 object AmiyaController {
+    private val imageFiles: ArrayList<File>
+    private val audioFiles: ArrayList<File>
     suspend fun Group.enableAmiya(function: AmiyaFunction): Listener<*> = when (function) {
         SIGN_IN -> subscribeAlways<GroupMessageEvent> {
             if (subject != this@enableAmiya) return@subscribeAlways
@@ -37,7 +39,7 @@ object AmiyaController {
         NUDGE -> subscribeAlways<NudgeEvent> {
             if (subject != this@enableAmiya) return@subscribeAlways
             if (target == bot) {
-                sendMessage("yee")
+                (subject as Group).randomMessage()
             }
         }
     }
@@ -46,21 +48,25 @@ object AmiyaController {
         GlobalEventChannel.subscribeAlways<E> { block() }
 
     private suspend fun Group.randomMessage(){
-        fun readFiles(path: String): ArrayList<File> {
-            val files: ArrayList<File> = arrayListOf()
-            val folder = dataFolder.resolve(path)
-            if (!folder.exists()) folder.mkdir()
-            folder.listFiles()?.forEach {
-                if (!it.isDirectory) files.add(it)
-            }
-            return files
-        }
-        val imageFiles: ArrayList<File> = readFiles("Image")
-        val audioFiles: ArrayList<File> = readFiles("Audio")
         when((0..2).random()){
-            0 -> { sendMessage("") }
+            0 -> { sendMessage("1") }
             1 -> { if (imageFiles.isNotEmpty()) sendImage(imageFiles.random()) }
             2 -> { if (audioFiles.isNotEmpty()) imageFiles.random().toExternalResource().use { uploadAudio(it).sendTo(this) } }
         }
+    }
+
+    private fun readFiles(path: String): ArrayList<File> {
+        val files = arrayListOf<File>()
+        val folder = dataFolder.resolve(path)
+        if (!folder.exists()) folder.mkdir()
+        folder.listFiles()?.forEach {
+            if (!it.isDirectory) files.add(it)
+        }
+        return files
+    }
+
+    init {
+        imageFiles = readFiles("Image")
+        audioFiles = readFiles("Audio")
     }
 }
