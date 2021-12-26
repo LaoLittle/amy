@@ -1,11 +1,7 @@
 package org.laolittle.plugin.database
 
-import org.ktorm.schema.Table
-import org.ktorm.schema.varchar
+import org.jetbrains.exposed.sql.Table
 
-
-object Enemies : Table<Nothing>("a_enemies") {
-    val name = varchar("name")
-    val aliasName = varchar("alias")
+object Enemies : Table() {
 
 }
