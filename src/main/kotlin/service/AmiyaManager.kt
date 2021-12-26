@@ -18,10 +18,10 @@ import org.laolittle.plugin.AmiyaData.enabledFunction
 import org.laolittle.plugin.AmiyaFunction
 import org.laolittle.plugin.Service
 import org.laolittle.plugin.onEnabledGroups
+import org.laolittle.plugin.AmiyaBot.logger
 import org.laolittle.plugin.service.AmiyaController.enableAmiya
 
 object AmiyaManager : Service() {
-    private val logger = AmiyaBot.logger
     override suspend fun main() {
         val amiyaAdministratorPerm = AmiyaBot.registerPermission(
             "amiya.operator",
