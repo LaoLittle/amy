@@ -5,7 +5,6 @@ import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.contact.nameCardOrNick
 import net.mamoe.mirai.event.GlobalEventChannel
-import net.mamoe.mirai.event.Listener
 import net.mamoe.mirai.event.events.BotMuteEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.buildMessageChain
@@ -13,13 +12,12 @@ import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.error
 import net.mamoe.mirai.utils.info
 import org.laolittle.plugin.AmiyaBot
+import org.laolittle.plugin.AmiyaBot.logger
 import org.laolittle.plugin.AmiyaBot.registerPermission
 import org.laolittle.plugin.AmiyaData.enabledFunction
 import org.laolittle.plugin.AmiyaFunction
 import org.laolittle.plugin.Service
 import org.laolittle.plugin.onEnabledGroups
-import org.laolittle.plugin.AmiyaBot.logger
-import org.laolittle.plugin.service.AmiyaController.enableAmiya
 
 object AmiyaManager : Service() {
     override suspend fun main() {
@@ -30,31 +28,19 @@ object AmiyaManager : Service() {
         GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
             val matchResult = Regex("(?i)(?:阿米娅|amiya)(.*)").find(message.content)
             if ((sender.isOperator() || sender.permitteeId.hasPermission(amiyaAdministratorPerm)) && (matchResult != null)) {
-                val listeners: MutableMap<AmiyaFunction, Listener<*>> =
-                    onEnabledGroups[subject.id]?.toMutableMap() ?: mutableMapOf()
                 val functionMatch = Regex("(打开|关闭)(.*)").find(matchResult.groupValues[1])
                 logger.info { matchResult.groupValues.toString() }
                 when (matchResult.groupValues[1]) {
                     "上班" -> {
                         val enabled = enabledFunction[subject.id] ?: mutableSetOf(*AmiyaFunction.values())
                         enabledFunction[subject.id] = enabled
-                        if (onEnabledGroups[subject.id] != null) {
+                        if (onEnabledGroups.add(subject.id))
+                            subject.sendMessage("开始996") else
                             subject.sendMessage("已经在上班了")
-                            return@subscribeAlways
-                        }
-                        enabled.forEach {
-                            listeners[it] = subject.enableAmiya(it)
-                        }
-                        onEnabledGroups[subject.id] = listeners
-                        subject.sendMessage("开始996")
                     }
                     "下班" -> {
-                        if (onEnabledGroups[subject.id] == null) return@subscribeAlways
-                        listeners.forEach {
-                            it.value.complete()
-                        }
-                        onEnabledGroups.remove(subject.id)
-                        subject.sendMessage("996结束")
+                        if (onEnabledGroups.remove(subject.id))
+                            subject.sendMessage("996结束")
                     }
                     "功能关闭列表" -> {
                         val msg = buildMessageChain {
@@ -70,7 +56,7 @@ object AmiyaManager : Service() {
                         subject.sendMessage(msg)
                     }
                 }
-                if (functionMatch != null){
+                if (functionMatch != null) {
                     val function = when (functionMatch.groupValues[2]) {
                         "签到" -> AmiyaFunction.SIGN_IN
                         "戳一戳" -> AmiyaFunction.NUDGE
@@ -81,13 +67,10 @@ object AmiyaManager : Service() {
                         }
                     }
                     val enable = enabledFunction[subject.id] ?: mutableSetOf(*AmiyaFunction.values())
-
                     when (functionMatch.groupValues[1]) {
                         "打开" -> {
                             if (enable.add(function)) {
                                 subject.sendMessage("已开启")
-                                if (onEnabledGroups.contains(subject.id)) listeners[function] =
-                                    subject.enableAmiya(function)
                             } else {
                                 subject.sendMessage("此功能已开启")
                                 return@subscribeAlways
@@ -97,8 +80,6 @@ object AmiyaManager : Service() {
                         "关闭" -> {
                             if (enable.remove(function)) {
                                 subject.sendMessage("已关闭")
-                                if (onEnabledGroups.contains(subject.id)) listeners[function]?.complete()
-                                    ?: logger.error { "发生预料外的错误" }
                             } else {
                                 subject.sendMessage("此功能已关闭")
                                 return@subscribeAlways
