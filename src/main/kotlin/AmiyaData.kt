@@ -3,7 +3,6 @@ package org.laolittle.plugin
 import net.mamoe.mirai.console.data.AutoSavePluginData
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
-import net.mamoe.mirai.event.Listener
 
 object AmiyaData : AutoSavePluginData("AmiyaData") {
     @ValueDescription("群聊开启的功能列表")
@@ -13,4 +12,4 @@ object AmiyaData : AutoSavePluginData("AmiyaData") {
     val aliasToGroup by value(mutableMapOf<Long, MutableMap<String, MutableSet<String>>>())
 }
 
-val onEnabledGroups: MutableMap<Long, Map<AmiyaFunction, Listener<*>>> = mutableMapOf()
+val onEnabledGroups = mutableSetOf<Long>()

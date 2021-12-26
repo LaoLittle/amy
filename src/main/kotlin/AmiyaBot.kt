@@ -8,6 +8,7 @@ import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.utils.info
+import org.laolittle.plugin.service.AmiyaListener
 import org.laolittle.plugin.service.AmiyaManager
 
 object AmiyaBot : KotlinPlugin(
@@ -21,8 +22,8 @@ object AmiyaBot : KotlinPlugin(
 ) {
     override fun onEnable() {
         GlobalEventChannel.subscribeAlways<BotOnlineEvent> {
-                init()
-                logger.info { "Bot(${bot.id}): Amiya-Bot 初始化完毕" }
+            init()
+            logger.info { "Bot(${bot.id}): Amiya-Bot 初始化完毕" }
         }
 
     }
@@ -35,5 +36,6 @@ object AmiyaBot : KotlinPlugin(
         AmiyaConfig.reload()
         AmiyaData.reload()
         AmiyaManager.start()
+        AmiyaListener.start()
     }
 }
