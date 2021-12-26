@@ -50,9 +50,8 @@ object AmiyaManager : Service() {
                     }
                     "下班" -> {
                         if (onEnabledGroups[subject.id] == null) return@subscribeAlways
-                        val enabled = enabledFunction[subject.id] ?: mutableSetOf(*AmiyaFunction.values())
-                        enabled.forEach {
-                            listeners[it]?.complete()
+                        listeners.forEach {
+                            it.value.complete()
                         }
                         onEnabledGroups.remove(subject.id)
                         subject.sendMessage("996结束")
@@ -61,7 +60,7 @@ object AmiyaManager : Service() {
                         val msg = buildMessageChain {
                             AmiyaFunction.values().forEach {
                                 if (enabledFunction[subject.id]?.contains(it) == false)
-                                    add(it.toString())
+                                    add("$it ,")
                             }
                         }
                         if (msg.isEmpty()) {
@@ -70,38 +69,41 @@ object AmiyaManager : Service() {
                         }
                         subject.sendMessage(msg)
                     }
-                }
-                val function = when (functionMatch?.let { it.groupValues[2] }) {
-                    "签到" -> AmiyaFunction.SIGN_IN
                     else -> {
-                        subject.sendMessage("我不知道你要开启什么")
-                        return@subscribeAlways
-                    }
-                }
-                val enable = enabledFunction[subject.id] ?: mutableSetOf(*AmiyaFunction.values())
+                        val function = when (functionMatch?.let { it.groupValues[2] }) {
+                            "签到" -> AmiyaFunction.SIGN_IN
+                            "戳一戳" -> AmiyaFunction.NUDGE
+                            else -> {
+                                subject.sendMessage("我不知道你要开启什么")
+                                return@subscribeAlways
+                            }
+                        }
+                        val enable = enabledFunction[subject.id] ?: mutableSetOf(*AmiyaFunction.values())
 
-                when (functionMatch.groupValues[1]) {
-                    "打开" -> {
-                        if (enable.add(function)) {
-                            subject.sendMessage("已开启")
-                            if (onEnabledGroups.contains(subject.id)) listeners[function] =
-                                subject.enableAmiya(function)
-                        } else {
-                            subject.sendMessage("此功能已开启")
-                            return@subscribeAlways
+                        when (functionMatch.groupValues[1]) {
+                            "打开" -> {
+                                if (enable.add(function)) {
+                                    subject.sendMessage("已开启")
+                                    if (onEnabledGroups.contains(subject.id)) listeners[function] =
+                                        subject.enableAmiya(function)
+                                } else {
+                                    subject.sendMessage("此功能已开启")
+                                    return@subscribeAlways
+                                }
+                                enabledFunction[subject.id] = enable
+                            }
+                            "关闭" -> {
+                                if (enable.remove(function)) {
+                                    subject.sendMessage("已关闭")
+                                    if (onEnabledGroups.contains(subject.id)) listeners[function]?.complete()
+                                        ?: logger.error { "发生预料外的错误" }
+                                } else {
+                                    subject.sendMessage("此功能已关闭")
+                                    return@subscribeAlways
+                                }
+                                enabledFunction[subject.id] = enable
+                            }
                         }
-                        enabledFunction[subject.id] = enable
-                    }
-                    "关闭" -> {
-                        if (enable.remove(function)) {
-                            subject.sendMessage("已关闭")
-                            if (onEnabledGroups.contains(subject.id)) listeners[function]?.complete()
-                                ?: logger.error { "发生预料外的错误" }
-                        } else {
-                            subject.sendMessage("此功能已关闭")
-                            return@subscribeAlways
-                        }
-                        enabledFunction[subject.id] = enable
                     }
                 }
             }
