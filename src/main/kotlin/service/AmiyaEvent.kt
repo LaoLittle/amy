@@ -1,8 +1,8 @@
 package org.laolittle.plugin.service
 
 import net.mamoe.mirai.contact.Group
+import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.event.AbstractEvent
-import net.mamoe.mirai.message.data.MessageChain
 
 data class SignIn(
     val group: Group
@@ -10,5 +10,6 @@ data class SignIn(
 
 data class Response(
     val group: Group,
+    val sender: Member,
     val message: String
 ) : AbstractEvent()
