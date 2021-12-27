@@ -1,4 +1,4 @@
-package org.laolittle.plugin.database
+package org.laolittle.plugin.database.table
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 
