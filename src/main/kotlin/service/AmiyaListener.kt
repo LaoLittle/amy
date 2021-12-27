@@ -18,19 +18,31 @@ import java.io.File
 object AmiyaListener : Service() {
     private val imageFiles: ArrayList<File>
     private val audioFiles: ArrayList<File>
+    const val matchNumber = "[一二三四五六七八九十]"
     override suspend fun main() {
         GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
             if (subject.id in onEnabledGroups) {
-                val matchResult = Regex("(?i)(?:阿米娅|amiya)(.*)").find(message.content) ?: return@subscribeAlways
+                val matchResult =
+                    Regex("(?i)(?:阿米娅|amiya)(签到|查看|公招|理智)(.*)").find(message.content) ?: return@subscribeAlways
                 val enabledFunction = AmiyaData.enabledFunction[subject.id] ?: return@subscribeAlways
                 when (matchResult.groupValues[1]) {
                     "签到" -> if (AmiyaFunction.SIGN_IN in enabledFunction) SignIn(subject).broadcast()
-                    else -> if (AmiyaFunction.RESPONSE in enabledFunction) Response(
-                        subject,
-                        sender,
-                        matchResult.groupValues[1]
-                    ).broadcast()
+                    "查看" -> {
+                        val matchQuery = Regex("(?i)(?:敌人|材料|物品)(.*)").find(matchResult.groupValues[2])
+                        with(matchQuery?.groupValues?.get(1)) {
+                            if (this.isNullOrBlank()) {
+                                subject.sendMessage("要查找什么呢")
+                            } else {
+                                TODO("查询")
+                            }
+                        }
+                    }
                 }
+                if (AmiyaFunction.RESPONSE in enabledFunction) Response(
+                    subject,
+                    sender,
+                    matchResult.groupValues[1]
+                ).broadcast()
             }
         }
         GlobalEventChannel.subscribeAlways<NudgeEvent> {
