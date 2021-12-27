@@ -7,6 +7,7 @@ import net.mamoe.mirai.event.broadcast
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.events.NudgeEvent
 import net.mamoe.mirai.message.data.*
+import net.mamoe.mirai.message.nextMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import org.laolittle.plugin.AmiyaBot.dataFolder
 import org.laolittle.plugin.AmiyaData
@@ -30,13 +31,14 @@ object AmiyaListener : Service() {
                     "查看" -> {
                         val matchQuery = Regex("(?i)(?:敌人|材料|物品)(.*)").find(matchResult.groupValues[2])
                         with(matchQuery?.groupValues?.get(1)) {
-                            if (this.isNullOrBlank()) {
-                                subject.sendMessage("要查找什么呢")
-                            } else {
+                            if (!this.isNullOrBlank()) {
                                 TODO("查询")
                             }
+                            return@subscribeAlways
                         }
                     }
+                    "公招" -> { TODO() }
+                    "理智" -> { TODO() }
                 }
                 if (AmiyaFunction.RESPONSE in enabledFunction) Response(
                     subject,
@@ -96,7 +98,7 @@ object AmiyaListener : Service() {
     }
 
     init {
-        imageFiles = readFiles("Image")
+        imageFiles = readFiles("Face")
         audioFiles = readFiles("Audio")
     }
 }
