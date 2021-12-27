@@ -4,6 +4,7 @@ import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermiss
 import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.contact.nameCardOrNick
+import net.mamoe.mirai.event.EventPriority
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.BotMuteEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
@@ -25,8 +26,10 @@ object AmiyaManager : Service() {
             "amiya.operator",
             "Amiya-Bot 管理员权限"
         )
-        GlobalEventChannel.subscribeAlways<GroupMessageEvent> {
-            val matchResult = Regex("(?i)(?:阿米娅|amiya)(.*)").find(message.content)
+        GlobalEventChannel.subscribeAlways<GroupMessageEvent>(
+            priority = EventPriority.HIGHEST
+        ) {
+            val matchResult = Regex("(?i)(?:阿米娅|amiya)(上班|下班|打开|关闭)").find(message.content)
             if ((sender.isOperator() || sender.permitteeId.hasPermission(amiyaAdministratorPerm)) && (matchResult != null)) {
                 val functionMatch = Regex("(打开|关闭)(.*)").find(matchResult.groupValues[1])
                 logger.info { matchResult.groupValues.toString() }
@@ -51,7 +54,6 @@ object AmiyaManager : Service() {
                         }
                         if (msg.isEmpty()) {
                             subject.sendMessage("没有关闭的功能")
-                            return@subscribeAlways
                         }
                         subject.sendMessage(msg)
                     }
@@ -80,7 +82,6 @@ object AmiyaManager : Service() {
                                 subject.sendMessage("已开启")
                             } else {
                                 subject.sendMessage("此功能已开启")
-                                return@subscribeAlways
                             }
                             enabledFunction[subject.id] = enable
                         }
@@ -89,7 +90,6 @@ object AmiyaManager : Service() {
                                 subject.sendMessage("已关闭")
                             } else {
                                 subject.sendMessage("此功能已关闭")
-                                return@subscribeAlways
                             }
                             enabledFunction[subject.id] = enable
                         }

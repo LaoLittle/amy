@@ -11,7 +11,8 @@ data class Response(
 ) : AbstractEvent()
 
 data class SignIn(
-    val group: Group
+    val group: Group,
+    val sender: Member
 ) : AbstractEvent()
 
 data class Gacha(

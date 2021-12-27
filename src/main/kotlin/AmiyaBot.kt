@@ -10,12 +10,7 @@ import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.utils.info
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.TransactionManager
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.laolittle.plugin.database.table.Enemies
 import org.laolittle.plugin.service.AmiyaListener
 import org.laolittle.plugin.service.AmiyaManager
 import java.sql.Connection
@@ -54,6 +49,7 @@ object AmiyaBot : KotlinPlugin(
             }
         }*/
     }
+
     private fun init() {
         AmiyaConfig.reload()
         AmiyaData.reload()
@@ -71,9 +67,5 @@ object AmiyaBot : KotlinPlugin(
         db = Database.connect(dataSource as DataSource)
         TransactionManager.manager.defaultIsolationLevel =
             Connection.TRANSACTION_SERIALIZABLE
-        transaction {
-            addLogger(StdOutSqlLogger)
-            SchemaUtils.create(Enemies)
-        }
     }
 }
