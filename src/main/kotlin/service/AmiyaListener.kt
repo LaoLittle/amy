@@ -1,6 +1,7 @@
 package org.laolittle.plugin.service
 
 import net.mamoe.mirai.contact.Group
+import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.broadcast
 import net.mamoe.mirai.event.events.GroupMessageEvent
@@ -24,32 +25,46 @@ object AmiyaListener : Service() {
                 val enabledFunction = AmiyaData.enabledFunction[subject.id] ?: return@subscribeAlways
                 when (matchResult.groupValues[1]) {
                     "签到" -> if (AmiyaFunction.SIGN_IN in enabledFunction) SignIn(subject).broadcast()
-                    else -> if (AmiyaFunction.RESPONSE in enabledFunction) Response(subject, matchResult.groupValues[1]).broadcast()
+                    else -> if (AmiyaFunction.RESPONSE in enabledFunction) Response(
+                        subject,
+                        sender,
+                        matchResult.groupValues[1]
+                    ).broadcast()
                 }
             }
         }
         GlobalEventChannel.subscribeAlways<NudgeEvent> {
             val group = subject
             if (group is Group && group.id in onEnabledGroups)
-                if (AmiyaData.enabledFunction[group.id]?.contains(AmiyaFunction.NUDGE) == true) Response(group, "").broadcast()
+                if (AmiyaData.enabledFunction[group.id]?.contains(AmiyaFunction.NUDGE) == true) Response(
+                    group,
+                    from as Member,
+                    ""
+                ).broadcast()
         }
         GlobalEventChannel.subscribeAlways<Response> {
-            if (message.isEmpty()) group.randomMessage()?.sendTo(group)
-            else {  }
+            if (message.isEmpty()) group.randomMessage(sender)?.sendTo(group)
+            else {
+                TODO()
+            }
         }
         GlobalEventChannel.subscribeAlways<SignIn> {
             TODO()
         }
     }
 
-    private suspend fun Group.randomMessage(): Message? {
-       return when ((0..2).random()) {
+    private suspend fun Group.randomMessage(target: Member): Message? {
+        return when ((0..3).random()) {
             0 -> {
-                PlainText("TODO")
+                At(target) + PlainText("TODO")
             }
             1 -> {
                 if (imageFiles.isNotEmpty()) imageFiles.random().toExternalResource()
                     .use { uploadImage(it) } else null
+            }
+            2 -> {
+                target.nudge().sendTo(this)
+                null
             }
             else -> {
                 if (audioFiles.isNotEmpty()) imageFiles.random().toExternalResource()
