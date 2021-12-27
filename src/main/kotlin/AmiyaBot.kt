@@ -15,7 +15,6 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.laolittle.plugin.database.Enemies
-import org.laolittle.plugin.database.UserInformation
 import org.laolittle.plugin.service.AmiyaListener
 import org.laolittle.plugin.service.AmiyaManager
 import javax.sql.DataSource
@@ -56,7 +55,6 @@ object AmiyaBot : KotlinPlugin(
         transaction {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(Enemies)
-            SchemaUtils.create(UserInformation)
         }
     }
 }

@@ -30,9 +30,5 @@ enum class AmiyaFunction {
     },
     WEIBO_POST {
         override fun toString(): String = "微博推送"
-    },
-    SEE_SOURCECODE {
-        override fun toString(): String = "查看阿米娅的源代码"
     }
-
 }

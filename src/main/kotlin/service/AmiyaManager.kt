@@ -61,6 +61,13 @@ object AmiyaManager : Service() {
                         "签到" -> AmiyaFunction.SIGN_IN
                         "戳一戳" -> AmiyaFunction.NUDGE
                         "互动" -> AmiyaFunction.RESPONSE
+                        "模拟抽卡" -> AmiyaFunction.GACHA_SIMULATE
+                        "干员查询" -> AmiyaFunction.QUERY_OPERATOR
+                        "敌人查询" -> AmiyaFunction.QUERY_ENEMY
+                        "物品查询" -> AmiyaFunction.QUERY_ITEM
+                        "公招查询" -> AmiyaFunction.QUERY_OFFER
+                        "合成玉计算" -> AmiyaFunction.CALC_GET
+                        "微博推送" -> AmiyaFunction.WEIBO_POST
                         else -> {
                             subject.sendMessage("我不知道你要开启什么")
                             return@subscribeAlways
