@@ -2,6 +2,7 @@ package org.laolittle.plugin.database
 
 import org.jetbrains.exposed.sql.Table
 
-object UserInformation : Table(){
-    val userName = varchar("name", 50)
+class UserInformation(qq: Long) : Table("info_$qq") {
+    val userNick = varchar("name", 50)
+    val headHunting = integer("headhunting")
 }
