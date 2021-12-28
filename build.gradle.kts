@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "1.5.30"
+    val kotlinVersion = "1.6.10"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    val exposedVersion = "0.36.2"
+    val exposedVersion = "0.37.1"
     val ktorVersion = "1.6.7"
     implementation("org.xerial:sqlite-jdbc:3.36.0.2")
     implementation("com.alibaba:druid:1.2.8")

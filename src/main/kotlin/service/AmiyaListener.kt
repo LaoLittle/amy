@@ -37,16 +37,20 @@ object AmiyaListener : Service() {
                 val matchResult =
                     Regex("(?i)(?:阿米娅|amiya)(签到|查看|公招|理智)(.*)").find(message.content)
                 val enabledFunction = AmiyaData.enabledFunction[subject.id] ?: return@subscribeAlways
-                if (matchResult== null){
-                    if (AmiyaFunction.RESPONSE in enabledFunction) {
+                if (matchResult == null){
+                   /* if (AmiyaFunction.RESPONSE in enabledFunction) {
                         Response(
                             subject,
                             sender,
                             message.content
                         ).broadcast()
                     }
+
+                    */
                     return@subscribeAlways
                 }
+
+
 
                 when (matchResult.groupValues[1]) {
                     "签到" -> if (AmiyaFunction.SIGN_IN in enabledFunction) SignIn(subject, sender).broadcast()

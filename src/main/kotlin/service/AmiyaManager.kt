@@ -29,9 +29,9 @@ object AmiyaManager : Service() {
         GlobalEventChannel.subscribeAlways<GroupMessageEvent>(
             priority = EventPriority.HIGHEST
         ) {
-            val matchResult = Regex("(?i)(?:阿米娅|amiya)(上班|下班|打开|关闭)").find(message.content)
+            val matchResult = Regex("(?i)(?:阿米娅|amiya)(上班|下班|功能关闭列表|打开|关闭)(.*)").find(message.content)
             if ((sender.isOperator() || sender.permitteeId.hasPermission(amiyaAdministratorPerm)) && (matchResult != null)) {
-                val functionMatch = Regex("(打开|关闭)(.*)").find(matchResult.groupValues[1])
+                val functionMatch = matchResult.groupValues[2]
                 logger.info { matchResult.groupValues.toString() }
                 when (matchResult.groupValues[1]) {
                     "上班" -> {
@@ -57,44 +57,47 @@ object AmiyaManager : Service() {
                         }
                         subject.sendMessage(msg)
                     }
-                }
-                if (functionMatch != null) {
-                    val function = when (functionMatch.groupValues[2]) {
-                        "签到" -> AmiyaFunction.SIGN_IN
-                        "戳一戳" -> AmiyaFunction.NUDGE
-                        "互动" -> AmiyaFunction.RESPONSE
-                        "模拟抽卡" -> AmiyaFunction.GACHA_SIMULATE
-                        "干员查询" -> AmiyaFunction.QUERY_OPERATOR
-                        "敌人查询" -> AmiyaFunction.QUERY_ENEMY
-                        "物品查询" -> AmiyaFunction.QUERY_ITEM
-                        "公招查询" -> AmiyaFunction.QUERY_OFFER
-                        "合成玉计算" -> AmiyaFunction.CALC_GET
-                        "微博推送" -> AmiyaFunction.WEIBO_POST
-                        else -> {
-                            subject.sendMessage("我不知道你要开启什么")
-                            return@subscribeAlways
+                    "打开", "关闭" -> {
+                        if (functionMatch.isNotBlank()) {
+                            val function = when (functionMatch) {
+                                "签到" -> AmiyaFunction.SIGN_IN
+                                "戳一戳" -> AmiyaFunction.NUDGE
+                                "互动" -> AmiyaFunction.RESPONSE
+                                "模拟抽卡" -> AmiyaFunction.GACHA_SIMULATE
+                                "干员查询" -> AmiyaFunction.QUERY_OPERATOR
+                                "敌人查询" -> AmiyaFunction.QUERY_ENEMY
+                                "物品查询" -> AmiyaFunction.QUERY_ITEM
+                                "公招查询" -> AmiyaFunction.QUERY_OFFER
+                                "合成玉计算" -> AmiyaFunction.CALC_GET
+                                "微博推送" -> AmiyaFunction.WEIBO_POST
+                                else -> {
+                                    subject.sendMessage("我不知道你要开启什么")
+                                    return@subscribeAlways
+                                }
+                            }
+                            val enable = enabledFunction[subject.id] ?: mutableSetOf(*AmiyaFunction.values())
+                            when (matchResult.groupValues[1]) {
+                                "打开" -> {
+                                    if (enable.add(function)) {
+                                        subject.sendMessage("已开启")
+                                    } else {
+                                        subject.sendMessage("此功能已开启")
+                                    }
+                                    enabledFunction[subject.id] = enable
+                                }
+                                "关闭" -> {
+                                    if (enable.remove(function)) {
+                                        subject.sendMessage("已关闭")
+                                    } else {
+                                        subject.sendMessage("此功能已关闭")
+                                    }
+                                    enabledFunction[subject.id] = enable
+                                }
+                            }
                         }
                     }
-                    val enable = enabledFunction[subject.id] ?: mutableSetOf(*AmiyaFunction.values())
-                    when (functionMatch.groupValues[1]) {
-                        "打开" -> {
-                            if (enable.add(function)) {
-                                subject.sendMessage("已开启")
-                            } else {
-                                subject.sendMessage("此功能已开启")
-                            }
-                            enabledFunction[subject.id] = enable
-                        }
-                        "关闭" -> {
-                            if (enable.remove(function)) {
-                                subject.sendMessage("已关闭")
-                            } else {
-                                subject.sendMessage("此功能已关闭")
-                            }
-                            enabledFunction[subject.id] = enable
-                        }
-                    }
                 }
+
             }
         }
 
