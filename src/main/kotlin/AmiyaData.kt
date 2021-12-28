@@ -10,6 +10,9 @@ object AmiyaData : AutoSavePluginData("AmiyaData") {
 
     @ValueDescription("别名")
     val aliasToGroup by value(mutableMapOf<Long, MutableMap<String, MutableSet<String>>>())
+
+    var uuid by value("")
+    var token by value("")
 }
 
 val onEnabledGroups = mutableSetOf<Long>()

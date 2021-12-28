@@ -1,21 +1,19 @@
 package org.laolittle.plugin.api.molly
 
+import io.ktor.client.request.*
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
-import org.laolittle.plugin.AmiyaBot
-import org.laolittle.plugin.utils.KtorOkHttp.post
-import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.HttpsURLConnection
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
 import kotlinx.serialization.json.put
-import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.utils.error
 import net.mamoe.mirai.utils.info
+import org.laolittle.plugin.AmiyaBot
+import org.laolittle.plugin.AmiyaConfig
+import org.laolittle.plugin.utils.KtorOkHttp.post
 import java.security.cert.X509Certificate
+import javax.net.ssl.*
 
 
 object MollyApiService {
@@ -41,7 +39,10 @@ object MollyApiService {
         }
 
         useInsecureSSL() // 忽略SSL证书
-        val json = jsonRequest.toString().post(mollyUrl)
+        val json = jsonRequest.toString().post(mollyUrl){
+            header("Api-Key", AmiyaConfig.api_key)
+            header("Api-Secret", AmiyaConfig.api_secret)
+        }
             AmiyaBot.logger.info { "服务器返回数据: $json" }
         return runCatching {
             val mollyData: MollyData = Json.decodeFromString(json)
